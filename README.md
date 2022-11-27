@@ -17,6 +17,8 @@
     3. 클래스 내 필드 갯수 제한.
     4. getter / setter 사용 제한.
 
+실패한 코드들은 체크시 버퍼에 저장되며 getMessage()를 활용해 버퍼에 저장된 패키지 및 실패 정보를 확인할 수 있습니다.
+
 ## Install
 
 ### gradle
@@ -48,6 +50,8 @@ CodeChecker codeChecker = CodeChecker.rules()
       .limitParameters(2)
       .build();
 ```
+
+초기화시 아무런 정보를 입력하지 않으면 기본값은 무한대로 설정됩니다.(실제는 정수 최대값)
 
 #### 모두 검증하기
 
@@ -104,63 +108,87 @@ getter / setter 검증의 경우 2가지 형태를 제공합니다.
 
 ## 사용 예시
 
+
+
+
+### example 1
+
+#### code
+
 ```java
 class CodeCheckerTest {
     
+  @Test
+  void returnFalseWhenDisobeyRules() {
+    // given
+    CodeChecker codeChecker = CodeChecker.rules()
+            .limitConstructors(3)
+            .limitFields(6)
+            .limitMethods(10)
+            .limitParameters(2)
+            .build();
+
+    // when
+    boolean checkAll = codeChecker.checkAll("org", true);
+    System.out.println(codeChecker.getMessage());
+
+    // then
+    assertThat(checkAll).isEqualTo(false);
+  }
+}
+```
+
+### result
+
+```text
+parameters: org.lhg.codechecker.tool.Scanners$4 # lambda$scan$0, count: 3.
+parameters count must be 2 but 3.
+
+parameters: org.lhg.codechecker.util.FileClassFinderImpl # searchFiles, count: 3.
+parameters count must be 2 but 3.
+
+parameters: org.lhg.codechecker.util.FileClassFinderImpl # addClasses, count: 3.
+parameters count must be 2 but 3.
+
+parameters: org.lhg.codechecker.util.FileScanner # addClasses, count: 3.
+parameters count must be 2 but 3.
+
+methods: org.lhg.codechecker.tool.CodeCheckerTest # [void org.lhg.codechecker.tool.CodeCheckerTest.shouldThrowIllegalArgumentExceptionWhenInputInvalidPackagePath(), void org.lhg.codechecker.tool.CodeCheckerTest.returnTrueWhenNotUseSetter(), void org.lhg.codechecker.tool.CodeCheckerTest.returnFalseWhenUseGetterOneClass(), void org.lhg.codechecker.tool.CodeCheckerTest.returnFalseWhenUseGetter(), void org.lhg.codechecker.tool.CodeCheckerTest.returnTrueWhenNotUserSetter(), void org.lhg.codechecker.tool.CodeCheckerTest.returnFalseWhenUseSetter(), void org.lhg.codechecker.tool.CodeCheckerTest.returnFalseWhenDisobeyRules(), void org.lhg.codechecker.tool.CodeCheckerTest.returnTrueWhenNotUseGetterClasses(), void org.lhg.codechecker.tool.CodeCheckerTest.returnMessageWhenDisobeyRules(), void org.lhg.codechecker.tool.CodeCheckerTest.returnTrueWhenObeyTheRules(), void org.lhg.codechecker.tool.CodeCheckerTest.returnTrueWhenNotUseSetterOneClass(), private static void org.lhg.codechecker.tool.CodeCheckerTest.lambda$shouldThrowIllegalArgumentExceptionWhenInputInvalidPackagePath$0(org.lhg.codechecker.tool.CodeChecker) throws java.lang.Throwable], count: 12.
+methods count must be 10 but 12.
+
+methods: org.lhg.codechecker.tool.CodeChecker # [public java.lang.String org.lhg.codechecker.tool.CodeChecker.getMessage(), public boolean org.lhg.codechecker.tool.CodeChecker.checkAll(java.lang.String,boolean), public static org.lhg.codechecker.tool.CodeChecker$ConfigurationBuilder org.lhg.codechecker.tool.CodeChecker.rules(), public boolean org.lhg.codechecker.tool.CodeChecker.checkNotUsingGetterMethod(java.lang.Class[]), public boolean org.lhg.codechecker.tool.CodeChecker.checkNotUsingGetterMethod(java.lang.String,boolean), public boolean org.lhg.codechecker.tool.CodeChecker.checkNotUsingSetterMethod(java.lang.String,boolean), public boolean org.lhg.codechecker.tool.CodeChecker.checkNotUsingSetterMethod(java.lang.Class[]), public boolean org.lhg.codechecker.tool.CodeChecker.checkParameterCount(java.lang.String,boolean), public boolean org.lhg.codechecker.tool.CodeChecker.checkConstructorCount(java.lang.String,boolean), private static org.lhg.codechecker.tool.Store org.lhg.codechecker.tool.CodeChecker.lambda$checkNotUsingGetterMethod$0(java.lang.Class), private static org.lhg.codechecker.tool.Store org.lhg.codechecker.tool.CodeChecker.lambda$checkNotUsingSetterMethod$1(java.lang.Class), public boolean org.lhg.codechecker.tool.CodeChecker.checkMethodCount(java.lang.String,boolean), public boolean org.lhg.codechecker.tool.CodeChecker.checkFieldCount(java.lang.String,boolean)], count: 13.
+methods count must be 10 but 13.
+```
+
+### example2
+
+#### code
+
+```java
+class CodeCheckerTest {
+
     @Test
-    void returnFalseWhenUseGetter() {
+    void returnFalseWhenUseGetterOneClass() {
         // given
         CodeChecker codeChecker = CodeChecker.rules()
                 .build();
 
         // when
-        boolean check = codeChecker.checkNotUsingGetterMethod("org.lhg", true);
+        boolean check = codeChecker.checkNotUsingGetterMethod(Store.class);
 
         // then
         System.out.println(codeChecker.getMessage());
         assertThat(check).isEqualTo(false);
     }
-
-    @Test
-    void returnTrueWhenNotUseGetterClasses() {
-        // given
-        CodeChecker codeChecker = CodeChecker.rules()
-                .build();
-
-        // when
-        boolean check = codeChecker.checkNotUsingGetterMethod(Scanners.class, ConstructorChecker.class);
-
-        // then
-        System.out.println(codeChecker.getMessage());
-        assertThat(check).isEqualTo(true);
-    }
-    
-    @Test
-    void returnTrueWhenNotUseSetterOneClass() {
-        // given
-        CodeChecker codeChecker = CodeChecker.rules()
-                .build();
-
-        // when
-        boolean check = codeChecker.checkNotUsingSetterMethod(Store.class);
-
-        // then
-        System.out.println(codeChecker.getMessage());
-        assertThat(check).isEqualTo(true);
-    }
-
-    @Test
-    void returnTrueWhenNotUseSetter() {
-        // given
-        CodeChecker codeChecker = CodeChecker.rules()
-                .build();
-
-        // when
-        boolean check = codeChecker.checkNotUsingSetterMethod("org.lhg.codechecker.tool.message", true);
-
-        // then
-        System.out.println(codeChecker.getMessage());
-        assertThat(check).isEqualTo(true);
-    }
 }
+```
+
+#### result
+
+```text
+getter method: org.lhg.codechecker.tool # getValue.
+getter method not allowed in package -> org.lhg.codechecker.tool.
+
+getter method: org.lhg.codechecker.tool # getPackageName.
+getter method not allowed in package -> org.lhg.codechecker.tool.
 ```
