@@ -40,20 +40,22 @@ public class FileScanner implements Scanner<Class<?>> {
     public List<Class<?>> scan(String basePackageName) {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = basePackageName.replace('.', '/');
-        return addClasses(basePackageName, classLoader, path);
-    }
-
-    private List<Class<?>> addClasses(String basePackageName, ClassLoader classLoader, String path) {
         List<Class<?>> classes = new ArrayList<>();
         try {
-            List<File> files = getFiles(classLoader, path);
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    classes.addAll(classFinder.findClasses(file, basePackageName));
-                }
-            }
+            classes =  addClasses(basePackageName, classLoader, path);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return classes;
+    }
+
+    private List<Class<?>> addClasses(String basePackageName, ClassLoader classLoader, String path) throws IOException {
+        List<Class<?>> classes = new ArrayList<>();
+        List<File> files = getFiles(classLoader, path);
+        for (File file : files) {
+            if (file.isDirectory()) {
+                classes.addAll(classFinder.findClasses(file, basePackageName));
+            }
         }
         return classes;
     }
