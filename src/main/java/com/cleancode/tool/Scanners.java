@@ -51,7 +51,14 @@ public enum Scanners {
     public List<Store<Object>> scan(String basePackageName) {
         List<Store<Object>> stores = new ArrayList<>();
         scan(basePackageName, stores);
+        validateStores(stores);
         return stores;
+    }
+
+    void validateStores(List<Store<Object>> stores) {
+        if (stores.isEmpty()) {
+            throw new IllegalArgumentException("Unable to find class to check code. please input valid package path");
+        }
     }
 
     public void setRecursive(boolean isRecursive) {
