@@ -1,6 +1,15 @@
 package com.cleancode.tool;
 
 import com.cleancode.tool.builder.CodeCheckerBuilder;
+import com.cleancode.tool.checker.Checker;
+import com.cleancode.tool.checker.ConstructorChecker;
+import com.cleancode.tool.checker.FieldChecker;
+import com.cleancode.tool.checker.GetterChecker;
+import com.cleancode.tool.checker.MethodChecker;
+import com.cleancode.tool.checker.ParameterChecker;
+import com.cleancode.tool.checker.SetterChecker;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CodeChecker implements CountChecker, GetterSetterChecker {
 
@@ -23,34 +32,80 @@ public class CodeChecker implements CountChecker, GetterSetterChecker {
         return new ConfigurationBuilder();
     }
 
+    public boolean checkAll(String basePackageName, boolean isRecursive) {
+        boolean checkParams = checkParameterCount(basePackageName, isRecursive);
+        boolean checkConstructors = checkConstructorCount(basePackageName, isRecursive);
+        boolean checkMethods = checkMethodCount(basePackageName, isRecursive);
+        boolean checkFields = checkFieldCount(basePackageName, isRecursive);
+        return checkFields && checkMethods && checkConstructors && checkParams;
+    }
+
     @Override
     public boolean checkParameterCount(String basePackageName, boolean isRecursive) {
-        return false;
+        Scanners.METHODS.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.METHODS.scan(basePackageName);
+        Checker checker = new ParameterChecker(limitParameters);
+        return checker.check(scanned, buffer);
     }
 
     @Override
     public boolean checkMethodCount(String basePackageName, boolean isRecursive) {
-        return false;
+        Scanners.METHODS.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.METHODS.scan(basePackageName);
+        Checker checker = new MethodChecker(limitMethods);
+        return checker.check(scanned, buffer);
     }
 
     @Override
     public boolean checkConstructorCount(String basePackageName, boolean isRecursive) {
-        return false;
+        Scanners.CONSTRUCTOR.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.CONSTRUCTOR.scan(basePackageName);
+        Checker checker = new ConstructorChecker(limitConstructors);
+        return checker.check(scanned, buffer);
     }
 
     @Override
     public boolean checkFieldCount(String basePackageName, boolean isRecursive) {
-        return false;
+        Scanners.FIELDS.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.FIELDS.scan(basePackageName);
+        Checker checker = new FieldChecker(limitFields);
+        return checker.check(scanned, buffer);
     }
 
     @Override
-    public boolean checkGetterMethod(String basePackageName, boolean isRecursive) {
-        return false;
+    public boolean checkNotUsingGetterMethod(Class<?> clazz) {
+        List<Store<Object>> stores = new ArrayList<>();
+        stores.add(Store.of(clazz.getPackageName(), clazz.getDeclaredMethods()));
+        Checker checker = new GetterChecker();
+        return checker.check(stores, buffer);
     }
 
     @Override
-    public boolean checkSetterMethod(String basePackageName, boolean isRecursive) {
-        return false;
+    public boolean checkNotUsingGetterMethod(String basePackageName, boolean isRecursive) {
+        Scanners.METHODS.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.METHODS.scan(basePackageName);
+        Checker checker = new GetterChecker();
+        return checker.check(scanned, buffer);
+    }
+
+    @Override
+    public boolean checkNotUsingSetterMethod(Class<?> clazz) {
+        List<Store<Object>> stores = new ArrayList<>();
+        stores.add(Store.of(clazz.getPackageName(), clazz.getDeclaredMethods()));
+        Checker checker = new SetterChecker();
+        return checker.check(stores, buffer);
+    }
+
+    @Override
+    public boolean checkNotUsingSetterMethod(String basePackageName, boolean isRecursive) {
+        Scanners.METHODS.setRecursive(isRecursive);
+        List<Store<Object>> scanned = Scanners.METHODS.scan(basePackageName);
+        Checker checker = new SetterChecker();
+        return checker.check(scanned, buffer);
+    }
+
+    public String getMessage() {
+        return buffer.toString();
     }
 
     public static class ConfigurationBuilder implements CodeCheckerBuilder {
