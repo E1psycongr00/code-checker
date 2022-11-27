@@ -44,12 +44,12 @@ public class CodeChecker implements CountChecker, GetterSetterChecker {
     }
 
     @Override
-    public boolean checkGetterMethod(String basePackageName, boolean isRecursive, boolean isAllow) {
+    public boolean checkGetterMethod(String basePackageName, boolean isRecursive) {
         return false;
     }
 
     @Override
-    public boolean checkSetterMethod(String basePackageName, boolean isRecursive, boolean isAllow) {
+    public boolean checkSetterMethod(String basePackageName, boolean isRecursive) {
         return false;
     }
 
