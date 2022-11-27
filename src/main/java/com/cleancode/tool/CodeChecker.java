@@ -8,8 +8,9 @@ import com.cleancode.tool.checker.GetterChecker;
 import com.cleancode.tool.checker.MethodChecker;
 import com.cleancode.tool.checker.ParameterChecker;
 import com.cleancode.tool.checker.SetterChecker;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CodeChecker implements CountChecker, GetterSetterChecker {
 
@@ -73,9 +74,10 @@ public class CodeChecker implements CountChecker, GetterSetterChecker {
     }
 
     @Override
-    public boolean checkNotUsingGetterMethod(Class<?> clazz) {
-        List<Store<Object>> stores = new ArrayList<>();
-        stores.add(Store.of(clazz.getPackageName(), clazz.getDeclaredMethods()));
+    public boolean checkNotUsingGetterMethod(Class<?>... classes) {
+        List<Store<Object>> stores = Stream.of(classes)
+                .map(clazz -> Store.of(clazz.getPackageName(), (Object) clazz.getDeclaredMethods()))
+                .collect(Collectors.toList());
         Checker checker = new GetterChecker();
         return checker.check(stores, buffer);
     }
@@ -89,9 +91,10 @@ public class CodeChecker implements CountChecker, GetterSetterChecker {
     }
 
     @Override
-    public boolean checkNotUsingSetterMethod(Class<?> clazz) {
-        List<Store<Object>> stores = new ArrayList<>();
-        stores.add(Store.of(clazz.getPackageName(), clazz.getDeclaredMethods()));
+    public boolean checkNotUsingSetterMethod(Class<?>... classes) {
+        List<Store<Object>> stores = Stream.of(classes)
+                .map(clazz -> Store.of(clazz.getPackageName(), (Object) clazz.getDeclaredMethods()))
+                .collect(Collectors.toList());
         Checker checker = new SetterChecker();
         return checker.check(stores, buffer);
     }
