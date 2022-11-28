@@ -130,10 +130,9 @@ class CodeCheckerTest {
 
     // when
     boolean checkAll = codeChecker.checkAll("org", true);
-    System.out.println(codeChecker.getMessage());
 
     // then
-    assertThat(checkAll).isEqualTo(false);
+    assertThat(check).as(codeChecker.getMessage()).isEqualTo(true);
   }
 }
 ```
@@ -177,8 +176,7 @@ class CodeCheckerTest {
         boolean check = codeChecker.checkNotUsingGetterMethod(Store.class);
 
         // then
-        System.out.println(codeChecker.getMessage());
-        assertThat(check).isEqualTo(false);
+        assertThat(check).as(codeChecker.getMessage()).isEqualTo(true);
     }
 }
 ```
