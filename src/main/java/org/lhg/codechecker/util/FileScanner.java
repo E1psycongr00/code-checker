@@ -21,7 +21,7 @@ public class FileScanner implements Scanner<Class<?>> {
         classFinder.setRecursive(isRecursive);
     }
 
-    private static List<File> getFiles(ClassLoader classLoader, String path) throws IOException {
+    private List<File> getFiles(ClassLoader classLoader, String path) throws IOException {
         List<File> files = new ArrayList<>();
         Enumeration<URL> resources = classLoader.getResources(path);
         while (resources.hasMoreElements()) {
