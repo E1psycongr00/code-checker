@@ -36,12 +36,12 @@ public class FileClassFinderImpl implements ClassFinder<File> {
             if (file.getName().endsWith(".class")) {
                 String className = packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
                 ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                addClasses(classes, className, classLoader);
+                addClass(classes, className, classLoader);
             }
         }
     }
 
-    private void addClasses(List<Class<?>> classes, String className, ClassLoader classLoader) {
+    private void addClass(List<Class<?>> classes, String className, ClassLoader classLoader) {
         try {
             classes.add(Class.forName(className, false, classLoader));
         } catch (ClassNotFoundException e) {
